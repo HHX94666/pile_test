@@ -24,8 +24,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'talker = pile_test.pile_test:main',
+            'pile_test = pile_test.pile_test:main',
             'service = pile_test.service:main',
-        ],
+        ],  
     },
 )
