@@ -13,6 +13,7 @@ from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
 
 from std_msgs.msg import String
 from std_msgs.msg import Empty
+from std_msgs.msg import Uint8
 from chassis_interfaces.srv import GetString
 
 
@@ -63,6 +64,12 @@ class PileTest(Node):
             self.charge_state_callback,
             qos)
 
+        self.charge_feedback = self.create_subscription(
+            Uint8,
+            '/auto_charge/charge_feedback',
+            self.charge_feedback_callback,
+            qos)
+
         timer_period = 0.5  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         
@@ -70,12 +77,24 @@ class PileTest(Node):
         self.failed_count = 0
         self.btconnect_failed_count = 0
         self.btconnect_success_count = 0
+        self.out_count = 0
+        self.in_count = 0
         self.bt_state = 0
 
 
         msg = Empty()
         self.charge_start.publish(msg)
         log.info('发送对桩命令')
+
+    def charge_feedback_callback(self, msg):
+        feedback = msg.data
+        log.info('[sub] feedback:%d' % feedback)
+        if feedback == 0:
+            self.out_count += 1
+            log.info('机器人弹桩  累计次数 %d 次' % self.out_count)
+        else:
+            self.in_count += 1
+            log.info('机器人压桩  累计次数 %d 次' % self.in_count)
 
     def charge_event_callback(self, msg):
         event = msg.data
