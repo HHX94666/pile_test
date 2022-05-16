@@ -13,7 +13,7 @@ from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
 
 from std_msgs.msg import String
 from std_msgs.msg import Empty
-from std_msgs.msg import Uint8
+from std_msgs.msg import UInt8
 from chassis_interfaces.srv import GetString
 
 
@@ -45,7 +45,7 @@ class PileTest(Node):
 
         log.setLevel("INFO")
 
-        self.time_node = rclpy.create_node('timer')
+        self.time_nodestd_msgs.msg = rclpy.create_node('timer')
 
         self.charge_cancel = self.create_publisher(
             Empty, '/auto_charge/cancel', qos)
@@ -65,7 +65,7 @@ class PileTest(Node):
             qos)
 
         self.charge_feedback = self.create_subscription(
-            Uint8,
+            UInt8,
             '/auto_charge/charge_feedback',
             self.charge_feedback_callback,
             qos)
