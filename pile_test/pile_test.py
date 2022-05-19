@@ -45,12 +45,12 @@ class PileTest(Node):
 
         log.setLevel("INFO")
 
-        self.time_nodestd_msgs.msg = rclpy.create_node('timer')
+        self.msg = rclpy.create_node('timer')
 
         self.charge_cancel = self.create_publisher(
             Empty, '/auto_charge/cancel', qos)
         self.charge_start = self.create_publisher(
-            Empty, '/auto_charge/start', qos)
+            String, '/auto_charge/start', qos)
 
         self.charge_event = self.create_subscription(
             String,
@@ -82,7 +82,8 @@ class PileTest(Node):
         self.bt_state = 0
 
 
-        msg = Empty()
+        msg = String()
+        msg.data = "NO"
         self.charge_start.publish(msg)
         log.info('发送对桩命令')
 
@@ -130,16 +131,24 @@ class PileTest(Node):
 
 
     def timer_callback(self):
-        msg = Empty()
+        msg = String()
+        msg.data = "NO"
         if self.charge_state == 2:
             self.charge_start.publish(msg)
             log.info('发送对桩命令')
             self.charge_state = 0
-
+            
+        msg_m= Empty()
         if self.charge_state == 1:
-            self.charge_cancel.publish(msg)
+            self.charge_cancel.publish(msg_m)
             log.info('发送脱桩命令')
             self.charge_state = 0
+
+    def pub_start(self):
+        msg = String()
+        msg.data = "NO"
+        self.charge_start.publish(msg)
+        log.info('发送对桩命令')
 
 
 def main(args=None):
@@ -147,6 +156,11 @@ def main(args=None):
     initLogging("pile_test.log","info")
 
     pile_test = PileTest()
+
+    pile_test.pub_start()
+    pile_test.pub_start()
+    pile_test.pub_start()
+    pile_test.pub_start()
 
     try:
         rclpy.spin(pile_test)
