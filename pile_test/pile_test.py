@@ -80,6 +80,7 @@ class PileTest(Node):
         self.out_count = 0
         self.in_count = 0
         self.bt_state = 0
+        self.auto_sign = False
 
 
         msg = String()
@@ -91,9 +92,11 @@ class PileTest(Node):
         feedback = msg.data
         log.info('[sub] feedback:%d' % feedback)
         if feedback == 0:
+            self.auto_sign = False
             self.out_count += 1
             log.info('机器人弹桩  累计次数 %d 次' % self.out_count)
-        else:
+        if feedback == 1 and self.auto_sign == False:
+            self.auto_sign = True
             self.in_count += 1
             log.info('机器人压桩  累计次数 %d 次' % self.in_count)
 
