@@ -34,7 +34,6 @@ def initLogging(logFilename, e):
 
 
 class PileTest(Node):
-    charge_state = 0
 
     def __init__(self):
         super().__init__('pile_test')
@@ -59,7 +58,7 @@ class PileTest(Node):
             self.charge_event_callback,
             qos)
         
-        self.charge_state = self.create_subscription(
+        self.charge_state_sub = self.create_subscription(
             String,
             '/auto_charge/state',
             self.charge_state_callback,
@@ -74,6 +73,7 @@ class PileTest(Node):
         # timer_period = 0.5  # seconds
         # self.timer = self.create_timer(timer_period, self.timer_callback)
         
+        self.charge_state = 0
         self.success_count = 0
         self.failed_count = 0
         self.btconnect_failed_count = 0
@@ -107,7 +107,7 @@ class PileTest(Node):
     def charge_event_callback(self, msg):
         event = msg.data
         log.info('[sub] %s' % event)
-        if event == "ChargeStart":
+        if event == "ChargeStart" or event == "WaitCancel":
             self.success_count += 1
             log.info('充电成功  累计次数 %d 次' % self.success_count)
             self.charge_state = 1
