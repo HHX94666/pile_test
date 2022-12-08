@@ -7,6 +7,7 @@ import time
 import sys
 import glog as log
 import logging
+import threading
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
@@ -70,8 +71,8 @@ class PileTest(Node):
             self.charge_feedback_callback,
             qos)
 
-        timer_period = 0.5  # seconds
-        self.timer = self.create_timer(timer_period, self.timer_callback)
+        # timer_period = 0.5  # seconds
+        # self.timer = self.create_timer(timer_period, self.timer_callback)
         
         self.success_count = 0
         self.failed_count = 0
@@ -81,6 +82,9 @@ class PileTest(Node):
         self.in_count = 0
         self.bt_state = 0
         self.auto_sign = False
+        self.thread = threading.Thread(
+            target=self.startThread, args=[])
+        self.thread.start()
 
 
         msg = String()
@@ -133,19 +137,23 @@ class PileTest(Node):
             self.bt_state  = 0
 
 
-    def timer_callback(self):
-        msg = String()
-        msg.data = "NO"
-        if self.charge_state == 2:
-            self.charge_start.publish(msg)
-            log.info('发送对桩命令')
-            self.charge_state = 0
-            
-        msg_m= Empty()
-        if self.charge_state == 1:
-            self.charge_cancel.publish(msg_m)
-            log.info('发送脱桩命令')
-            self.charge_state = 0
+    def startThread(self):
+        while True:
+            msg = String()
+            msg.data = "NO"
+            if self.charge_state == 2:
+                self.charge_start.publish(msg)
+                log.info('发送对桩命令')
+                self.charge_state = 0
+                
+            msg_m= Empty()
+            if self.charge_state == 1:
+                log.info('开始延时10分钟')
+                time.sleep(60*10)
+                log.info('延时结束')
+                self.charge_cancel.publish(msg_m)
+                log.info('发送脱桩命令')
+                self.charge_state = 0
 
     def pub_start(self):
         msg = String()
